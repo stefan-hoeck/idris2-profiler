@@ -8,6 +8,7 @@ brief      = "A simple profiling utility for Idris 2"
 
 sourcedir  = "src"
 depends    = base    >= 0.5.1
+           , prim
 
 modules = Profile
         , Profile.Runner

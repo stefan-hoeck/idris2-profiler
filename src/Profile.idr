@@ -1,6 +1,6 @@
 module Profile
 
-import Profile.Runner
-import Profile.Types
+import public Profile.Runner
+import public Profile.Types
 
 %default total
