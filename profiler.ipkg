@@ -12,4 +12,6 @@ depends    = base    >= 0.5.1
 
 modules = Profile
         , Profile.Runner
+        , Profile.Statistics
         , Profile.Types
+        , Text.Printf
