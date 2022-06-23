@@ -36,19 +36,21 @@ fromInteger n = MkPos (cast n)
 public export
 record Benchmarkable (err : Type) where
   constructor MkBenchmarkable
-  {0 env        : Type}
+  {0 environment : Type}
+
+  {0 result      : Type}
 
   ||| Allocates an environment for running the benchmark
   ||| the given number of times.
-  allocEnv      : Pos -> IO env
+  allocEnv      : Pos -> IO environment
 
   ||| Cleanup the environment after running the benchmark
   ||| the given number of times.
-  cleanEnv      : Pos -> env -> IO ()
+  cleanEnv      : Pos -> environment -> IO ()
 
   ||| Run a benchmurk in the given environment for
   ||| the given number of times.
-  runRepeatedly : env -> Pos -> IO (Either err a)
+  runRepeatedly : environment -> Pos -> IO (Either err result)
 
 repeatedly_ : Nat -> PrimIO (Either err ()) -> PrimIO (Either err ())
 repeatedly_ 0     _ w = MkIORes (Right ()) w
