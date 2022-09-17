@@ -138,8 +138,8 @@ runBenchmark timeLimit b = do
            in if done then MkIORes (Right (sr <>> [r])) w2
               else go (sr :< r) ps st overThreshold (S nr) w2
 
-showStats : Nat -> String -> Stats -> String
-showStats k name stats = """
+detailStats : Nat -> String -> Stats -> String
+detailStats k name stats = """
   # \{show k}: \{name}
     time per run : \{printAtto stats.slope}
     mean         : \{printAtto stats.mean}
@@ -148,16 +148,29 @@ showStats k name stats = """
 
   """
 
-runAndPrint :  Nat 
+tableStats : Nat -> String -> Stats -> String
+tableStats k name stats =
+  let nm   := padRight 50 ' ' name
+      tpr  := padLeft 10 ' ' $ printAtto stats.slope
+      mean := padLeft 10 ' ' $ printAtto stats.mean
+      r2   := pack $ take 5 $ unpack $ show stats.r2
+   in "\{nm} \{tpr} \{mean} \{r2}"
+
+showStats : Format -> Nat -> String -> Stats -> String
+showStats Table   = tableStats
+showStats Details = detailStats
+
+runAndPrint :  Format
+            -> Nat 
             -> String
             -> Benchmarkable err
             -> IO (Either err ())
-runAndPrint k name b = do
+runAndPrint format k name b = do
   Right (h :: t) <- runBenchmark (fromSeconds 1) b
     | Right [] => pure (Right ())
     | Left err => pure (Left err)
 
-  putStrLn (showStats k name $ regr (h :: fromList t))
+  putStrLn (showStats format k name $ regr (h :: fromList t))
   pure (Right ())
 
 for :  (String -> Bool)
@@ -184,10 +197,11 @@ for select b f = ignore <$> fromPrim (go 1 "" b)
 
 export
 runDefault :  (String -> Bool)
+           -> Format
            -> (err -> String)
            -> Benchmark err
            -> IO ()
-runDefault select showErr b = do
-  Left err <- for select b runAndPrint
+runDefault select format showErr b = do
+  Left err <- for select b (runAndPrint format)
     | Right () => pure ()
   putStrLn (showErr err)
