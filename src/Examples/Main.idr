@@ -49,4 +49,4 @@ bench = Group "list_ops" [
   ]
 
 main : IO ()
-main = runDefault (const True) show bench
+main = runDefault (const True) Table show bench
