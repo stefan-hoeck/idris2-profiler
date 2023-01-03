@@ -182,11 +182,12 @@ for select b f = ignore <$> fromPrim (go 1 "" b)
 
         go : Nat -> String -> Benchmark err -> PrimIO (Either err Nat)
         go k s (Single name bench) w =
-          if select s
-             then let MkIORes (Right _) w2 = toPrim (f k (addPrefix s name) bench) w
-                        | MkIORes (Left err) w2 => MkIORes (Left err) w2
-                   in MkIORes (Right $ S k) w2
-             else MkIORes (Right k) w
+          let s' := addPrefix s name
+           in if select s'
+                then let MkIORes (Right _) w2 = toPrim (f k s' bench) w
+                           | MkIORes (Left err) w2 => MkIORes (Left err) w2
+                      in MkIORes (Right $ S k) w2
+                else MkIORes (Right k) w
         go k s (Group name benchs) w = many k (addPrefix s name) benchs w
 
         many k s [] w        = MkIORes (Right k) w
