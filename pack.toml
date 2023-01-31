@@ -1,0 +1,4 @@
+[custom.all.profiler]
+type   = "local"
+path   = "."
+ipkg   = "profiler.ipkg"
