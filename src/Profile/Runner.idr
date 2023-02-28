@@ -1,32 +1,12 @@
 module Profile.Runner
 
-import Data.Prim.Integer.Extra
+import Decidable.HDec.Integer
 import Data.String
+import Text.Printf
 import Profile.Statistics
 import Profile.Types
 
 %default total
-
-pow10 : Nat -> Subset Integer (> 0)
-pow10 0     = Element 1 %search
-pow10 (S k) =
-  let Element v prf = pow10 k
-   in Element (10 * v) (multPosPosGT0 10 v %search prf)
-
-significant : (v : Integer) -> (n : Nat) -> (Integer,Nat)
-significant v n = go v 0 (pow10 n) (accessLT v)
-  where go :  (rem : Integer)
-           -> (exp : Nat)
-           -> (max : Subset Integer (> 0))
-           -> (0 acc : Accessible (BoundedLT 0) rem)
-           -> (Integer,Nat)
-        go rem exp max (Access rec) = case testLT {lt = (<)} rem max.fst of
-          Left0  _ => (rem,exp)
-          Right0 p =>
-            let 0 remPos = trans_LT_LTE max.snd p
-                0 pdiv   = divGreaterOneLT {d = 10} remPos %search
-                0 pdiv2  = divNonNeg {d = 10} (Left remPos) %search
-             in go (rem `div` 10) (S exp) max (rec _ %search)
 
 unitFor : Integer -> String
 unitFor 0 = "fs"
@@ -48,10 +28,10 @@ nonSec sig exp s =
    in "\{pre}.\{post} \{s}"
 
 printPos : Integer -> String
-printPos n =
-  if n < 1000 then padLeft 8 ' ' "\{show n} as"
-  else
-    let (n',exp) = significant n 4
+printPos n = case lte 1000 n of
+  Nothing0 => padLeft 8 ' ' "\{show n} as"
+  Just0 x  =>
+    let (n',exp) = significant n 4 @{weak [0,1000,n]}
         exp'     = cast {to = Integer} exp
      in case unitFor (exp' `div` 3) of
           "s" => case exp `minus` 18 of
@@ -161,7 +141,7 @@ showStats Table   = tableStats
 showStats Details = detailStats
 
 runAndPrint :  Format
-            -> Nat 
+            -> Nat
             -> String
             -> Benchmarkable err
             -> IO (Either err ())
