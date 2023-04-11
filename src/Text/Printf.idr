@@ -1,7 +1,7 @@
 module Text.Printf
 
 import Data.DPair
-import Decidable.HDec.Integer
+import Data.Refined.Integer
 
 %default total
 

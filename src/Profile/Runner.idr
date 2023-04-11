@@ -1,6 +1,6 @@
 module Profile.Runner
 
-import Decidable.HDec.Integer
+import Data.Refined.Integer
 import Data.String
 import Text.Printf
 import Profile.Statistics
