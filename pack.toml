@@ -2,3 +2,15 @@
 type   = "local"
 path   = "."
 ipkg   = "profiler.ipkg"
+
+[custom.all.algebra]
+type   = "git"
+url    = "https://github.com/stefan-hoeck/idris2-algebra"
+commit = "latest:main"
+ipkg   = "algebra.ipkg"
+
+[custom.all.refined]
+type   = "git"
+url    = "https://github.com/stefan-hoeck/idris2-refined"
+commit = "latest:main"
+ipkg   = "refined.ipkg"
