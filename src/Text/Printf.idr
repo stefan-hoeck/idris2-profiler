@@ -26,10 +26,12 @@ significant v n = go v 0 (pow10 n)
   -- until it drops below the number of desired digits.
   -- The complexity comes from the totality proof, which
   -- is definitely overkill here but still oddly satisfying.
-  where go :  (rem : Integer)
-           -> (exp : Nat)
-           -> (max : Integer)
-           -> (Integer,Nat)
-        go rem exp max = case lt rem max of
-          Nothing0 => go (assert_smaller rem (rem `div` 10)) (S exp) max
-          Just0 x  => (rem,exp)
+  where
+    go :
+         (rem : Integer)
+      -> (exp : Nat)
+      -> (max : Integer)
+      -> (Integer,Nat)
+    go rem exp max = case lt rem max of
+      Nothing0 => go (assert_smaller rem (rem `div` 10)) (S exp) max
+      Just0 x  => (rem,exp)

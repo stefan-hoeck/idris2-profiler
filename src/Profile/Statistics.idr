@@ -25,17 +25,21 @@ calcR2 it_at at2 it2 = toFloat (square it_at) / toFloat (mult at2 it2)
 export
 regr : (ms : Vect (S n) Measured) -> Stats
 regr ms =
-  let iters      = map iterations ms
-      attos      = map totalTime ms
-      mean_iter  = mean iters
-      mean_attos = mean attos
-      mean_avrg  = mean (map avrgTime ms)
-      ss_iter    =       scalarSum (map square iters)
-                 `minus` mult (posLength ms) (square mean_iter)
-      ss_atto    =       scalarSum (map square attos)
-                 `minus` mult (posLength ms) (square mean_attos)
-      ss_it_at   = scalarSum (zipWith mult iters attos)
-                 `minus` mult (posLength ms) (mult mean_iter mean_attos)
-   in MkStats (ss_it_at `div` ss_iter)
-              mean_avrg
-              (calcR2 ss_it_at ss_atto ss_iter)
+  let iters      := map iterations ms
+      attos      := map totalTime ms
+      mean_iter  := mean iters
+      mean_attos := mean attos
+      mean_avrg  := mean (map avrgTime ms)
+      ss_iter    :=
+        scalarSum (map square iters) `minus`
+        mult (posLength ms) (square mean_iter)
+      ss_atto    :=
+        scalarSum (map square attos) `minus`
+        mult (posLength ms) (square mean_attos)
+      ss_it_at   :=
+        scalarSum (zipWith mult iters attos) `minus`
+        mult (posLength ms) (mult mean_iter mean_attos)
+   in MkStats
+        (ss_it_at `div` ss_iter)
+        mean_avrg
+        (calcR2 ss_it_at ss_atto ss_iter)
