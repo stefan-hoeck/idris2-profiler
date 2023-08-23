@@ -63,7 +63,7 @@ record Benchmarkable (err : Type) where
 repeatedly_ : Nat -> PrimIO (Either err ()) -> PrimIO (Either err ())
 repeatedly_ 0     _ w = MkIORes (Right ()) w
 repeatedly_ (S k) f w =
-  let MkIORes (Right _) w2 = f w | res => res
+  let MkIORes (Right _) w2 := f w | res => res
    in repeatedly_ k f w2
 
 ||| Tail-recursively runs an IO action the given number
@@ -75,11 +75,12 @@ repeatedly (MkPos n) io = fromPrim $ repeatedly_ n (toPrim io)
 
 export
 singleIO : IO () -> Benchmarkable Void
-singleIO io = MkBenchmarkable {
-    allocEnv = \_ => pure ()
-  , cleanEnv = \_,_ => pure ()
-  , runRepeatedly = \(),n => repeatedly n (map Right io)
-  }
+singleIO io =
+  MkBenchmarkable
+    { allocEnv = \_ => pure ()
+    , cleanEnv = \_,_ => pure ()
+    , runRepeatedly = \(),n => repeatedly n (map Right io)
+    }
 
 repeatedlyPure_ : Nat -> a -> (() -> Either err a) -> Either err a
 repeatedlyPure_ 0     v _ = Right v
@@ -88,18 +89,19 @@ repeatedlyPure_ (S k) v f = case f () of
   Left err => Left err
 
 export
-repeatedlyPure : Pos -> (() -> Either err a) -> Either err a 
+repeatedlyPure : Pos -> (() -> Either err a) -> Either err a
 repeatedlyPure (MkPos $ S n) f = case f () of
   Left err => Left err
   Right v  => repeatedlyPure_ n v f
 
 export
 singlePure : (() -> Either err a) -> Benchmarkable err
-singlePure f = MkBenchmarkable {
-    allocEnv = \_ => pure ()
-  , cleanEnv = \_,_ => pure ()
-  , runRepeatedly = \(),n => map (`repeatedlyPure` f) (pure n)
-  }
+singlePure f =
+  MkBenchmarkable
+    { allocEnv = \_ => pure ()
+    , cleanEnv = \_,_ => pure ()
+    , runRepeatedly = \(),n => map (`repeatedlyPure` f) (pure n)
+    }
 
 export
 basic : (a -> b) -> a -> Benchmarkable Void
@@ -222,8 +224,10 @@ fromSeconds = fromMilliSeconds . (* 1000)
 
 public export
 fromClock : Clock Duration -> AttoSeconds
-fromClock c = plus (fromNanoSeconds $ nanoseconds c)
-                   (fromSeconds $ seconds c)
+fromClock c =
+  plus
+    (fromNanoSeconds $ nanoseconds c)
+    (fromSeconds $ seconds c)
 
 export
 timeDelta : Clock t -> Clock t -> AttoSeconds
