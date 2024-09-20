@@ -60,6 +60,10 @@ record Benchmarkable (err : Type) where
   ||| the given number of times.
   runRepeatedly : environment -> Pos -> IO (Either err result)
 
+  ||| True, if this is a pure computation and we are only interested
+  ||| in the time spent on the CPU.
+  cpuOnly       : Bool
+
 repeatedly_ : Nat -> PrimIO (Either err ()) -> PrimIO (Either err ())
 repeatedly_ 0     _ w = MkIORes (Right ()) w
 repeatedly_ (S k) f w =
@@ -80,6 +84,7 @@ singleIO io =
     { allocEnv = \_ => pure ()
     , cleanEnv = \_,_ => pure ()
     , runRepeatedly = \(),n => repeatedly n (map Right io)
+    , cpuOnly  = False
     }
 
 repeatedlyPure_ : Nat -> a -> (() -> Either err a) -> Either err a
@@ -101,6 +106,7 @@ singlePure f =
     { allocEnv = \_ => pure ()
     , cleanEnv = \_,_ => pure ()
     , runRepeatedly = \(),n => map (`repeatedlyPure` f) (pure n)
+    , cpuOnly  = True
     }
 
 export
@@ -248,6 +254,9 @@ record Measured where
   ||| Number of iterations
   iterations : Runs
 
+  ||| True, if we are interested only in the CPU time
+  cpuOnly    : Bool
+
   ||| Wall clock time when starting the measurement
   startTime  : Clock Monotonic
 
@@ -262,6 +271,17 @@ record Measured where
 
   ||| Total CPU time elapsed
   cpuTime    : AttoSeconds
+
+  ||| Average CPU time elapsed per iteration
+  avrgCPU    : AttoSecondsPerRun
+
+export
+tot : Measured -> AttoSeconds
+tot m = if m.cpuOnly then m.cpuTime else m.totalTime
+
+export
+avrg : Measured -> AttoSecondsPerRun
+avrg m = if m.cpuOnly then m.avrgCPU else m.avrgTime
 
 --------------------------------------------------------------------------------
 --          Result of running a single benchmark
