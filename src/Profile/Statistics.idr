@@ -26,10 +26,10 @@ export
 regr : (ms : Vect (S n) Measured) -> Stats
 regr ms =
   let iters      := map iterations ms
-      attos      := map totalTime ms
+      attos      := map tot ms
       mean_iter  := mean iters
       mean_attos := mean attos
-      mean_avrg  := mean (map avrgTime ms)
+      mean_avrg  := mean (map avrg ms)
       ss_iter    :=
         scalarSum (map square iters) `minus`
         mult (posLength ms) (square mean_iter)

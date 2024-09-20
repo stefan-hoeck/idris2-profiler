@@ -59,7 +59,7 @@ runs = go 600 [< 1] 1 1.0
 -- runs a benchmark once with the given number of
 -- interations
 run : Pos -> Benchmarkable err -> IO (Either err Measured)
-run p (MkBenchmarkable alloc clean go) = do
+run p (MkBenchmarkable alloc clean go cpuonly) = do
   env      <- alloc p
   start    <- clockTime Monotonic
   startCPU <- clockTime Process
@@ -69,6 +69,7 @@ run p (MkBenchmarkable alloc clean go) = do
   clean p env
 
   let tot  := timeDelta start stop
+      cpu  := timeDelta startCPU stopCPU
       runs := the Runs $ MkScalar $ cast p.val
       meas :=
         MkMeasured
@@ -77,7 +78,9 @@ run p (MkBenchmarkable alloc clean go) = do
           , stopTime   = stop
           , totalTime  = tot
           , avrgTime   = tot `div` runs
-          , cpuTime    = timeDelta stopCPU startCPU
+          , cpuTime    = cpu
+          , avrgCPU    = cpu `div` runs
+          , cpuOnly    = cpuonly
           }
   case res of
     Left err => pure (Left err)
