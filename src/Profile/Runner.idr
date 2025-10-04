@@ -8,6 +8,10 @@ import Profile.Types
 
 %default total
 
+%foreign "scheme,chez:(lambda () (collect (collect-maximum-generation)))"
+         "javascript:lambda:(w) => {}"
+prim__collect : PrimIO ()
+
 unitFor : Integer -> String
 unitFor 0 = "fs"
 unitFor 1 = "ps"
@@ -57,10 +61,11 @@ runs = go 600 [< 1] 1 1.0
        in go k (if p2.val > p.val then sx :< p2 else sx) p2 nx
 
 -- runs a benchmark once with the given number of
--- interations
+-- iterations
 run : Pos -> Benchmarkable err -> IO (Either err Measured)
 run p (MkBenchmarkable alloc clean go cpuonly) = do
   env      <- alloc p
+  fromPrim prim__collect
   start    <- clockTime Monotonic
   startCPU <- clockTime Process
   res      <- go env p
